@@ -103,5 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 results/
+data/KITTI/tracking
 deprecated/
 tmp/*
+data/KITTI/tracking/testing/calib
