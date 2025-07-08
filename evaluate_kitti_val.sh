@@ -1,5 +1,6 @@
 #!/bin/bash
-
+export NUMBA_DISABLE_JIT=1
+echo "NUMBA JIT DISABLED"
 # Set PYTHONPATH for Xinshuo_PyToolbox
 export PYTHONPATH=${PYTHONPATH}:/home/antonin-sumner/projects/AB3DMOT
 export PYTHONPATH=${PYTHONPATH}:/home/antonin-sumner/projects/AB3DMOT/Xinshuo_PyToolbox
