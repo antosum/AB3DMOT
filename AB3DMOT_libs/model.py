@@ -111,14 +111,17 @@ class AB3DMOT(object):
 		print_log('max age is %f' % self.max_age, log=self.log, display=False)
 		print_log('ego motion compensation is %d' % self.ego_com, log=self.log, display=False)
 
-	def process_dets(self, dets):
+	def process_dets(self, dets, input_ids=None):
 		# convert each detection into the class Box3D 
 		# inputs: 
 		# 	dets - a numpy array of detections in the format [[h,w,l,x,y,z,theta],...]
+		#	input_ids - optional list of original bbox IDs corresponding to each detection
 
 		dets_new = []
-		for det in dets:
+		for i, det in enumerate(dets):
 			det_tmp = Box3D.array2bbox_raw(det)
+			if input_ids is not None:
+				det_tmp.input_id = input_ids[i]
 			dets_new.append(det_tmp)
 
 		return dets_new
@@ -379,15 +382,17 @@ class AB3DMOT(object):
 
 		return affi
 
-	def track(self, dets_all, frame, seq_name):
+	def track(self, dets_all, frame, seq_name, input_ids=None):
 		"""
 		Params:
 		  	dets_all: dict
 				dets - a numpy array of detections in the format [[h,w,l,x,y,z,theta],...]
 				info: a array of other info for each det
 			frame:    str, frame number, used to query ego pose
+			input_ids: optional list of original bbox IDs corresponding to each detection
 		Requires: this method must be called once for each frame even with empty detections.
-		Returns the a similar array, where the last column is the object ID.
+		Returns the a similar array, where the last column is the object ID, 
+		plus affinity matrix, plus mapping from track IDs to input IDs.
 
 		NOTE: The number of objects returned may differ from the number of detections provided.
 		"""
@@ -404,7 +409,7 @@ class AB3DMOT(object):
 		self.id_past = [trk.id for trk in self.trackers]
 
 		# process detection format
-		dets = self.process_dets(dets)
+		dets = self.process_dets(dets, input_ids)
 
 		# tracks propagation based on velocity
 		trks = self.prediction()
@@ -440,6 +445,36 @@ class AB3DMOT(object):
 		# create and initialise new trackers for unmatched detections
 		new_id_list = self.birth(dets, info, unmatched_dets)
 
+		# build mapping from track IDs to input IDs
+		id_mapping = {}
+		
+		# map matched detections: input_id -> detection_index -> track_id
+		for match in matched:
+			det_idx, trk_idx = match[0], match[1]
+			track_id = self.trackers[trk_idx].id
+			if det_idx < len(dets) and hasattr(dets[det_idx], 'input_id'):
+				input_id = dets[det_idx].input_id
+			else:
+				input_id = None
+			id_mapping[track_id] = input_id
+		
+		# map new births: input_id -> unmatched_detection -> new_track_id
+		for i, unmatched_det_idx in enumerate(unmatched_dets):
+			if i < len(new_id_list):
+				new_track_id = new_id_list[i]
+				if unmatched_det_idx < len(dets) and hasattr(dets[unmatched_det_idx], 'input_id'):
+					input_id = dets[unmatched_det_idx].input_id
+				else:
+					input_id = None
+				id_mapping[new_track_id] = input_id
+		
+		# map unmatched tracks (propagated without detection)
+		for trk_idx in unmatched_trks:
+			if trk_idx < len(self.trackers):
+				track_id = self.trackers[trk_idx].id
+				if track_id not in id_mapping:  # avoid overwriting
+					id_mapping[track_id] = None
+
 		# output existing valid tracks
 		results = self.output()
 		if len(results) > 0: results = [np.concatenate(results)]		# h,w,l,x,y,z,theta, ID, other info, confidence
@@ -459,4 +494,4 @@ class AB3DMOT(object):
 			print_log(results[result_index][:, :8], log=self.log, display=False)
 			print_log('', log=self.log, display=False)
 
-		return results, affi
+		return results, affi, id_mapping

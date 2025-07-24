@@ -8,7 +8,8 @@ class Filter(object):
 		self.time_since_update = 0
 		self.id = ID
 		self.hits = 1           		# number of total hits including the first detection
-		self.info = info        		# other information associated	
+		self.info = info        		# other information associated
+		self.input_id = getattr(bbox3D, 'input_id', None)  # preserve original input bbox ID	
 
 class KF(Filter):
 	def __init__(self, bbox3D, info, ID):

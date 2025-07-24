@@ -4,7 +4,7 @@ from copy import deepcopy
 from .kitti_oxts import roty
 
 class Box3D:
-    def __init__(self, x=None, y=None, z=None, h=None, w=None, l=None, ry=None, s=None):
+    def __init__(self, x=None, y=None, z=None, h=None, w=None, l=None, ry=None, s=None, input_id=None):
         self.x = x      # center x
         self.y = y      # center y
         self.z = z      # center z
@@ -13,6 +13,7 @@ class Box3D:
         self.l = l      # length
         self.ry = ry    # orientation
         self.s = s      # detection score
+        self.input_id = input_id  # original input bbox ID for tracking correspondence
         self.corners_3d_cam = None
 
     def __str__(self):
