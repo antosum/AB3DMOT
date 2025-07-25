@@ -4,8 +4,8 @@
 export NUMBA_DISABLE_JIT=1
 
 # Set PYTHONPATH for Xinshuo_PyToolbox
-export PYTHONPATH=${PYTHONPATH}:/home/antonin-sumner/projects/AB3DMOT
-export PYTHONPATH=${PYTHONPATH}:/home/antonin-sumner/projects/AB3DMOT/Xinshuo_PyToolbox
+export PYTHONPATH=${PYTHONPATH}:~/projects/AB3DMOT
+export PYTHONPATH=${PYTHONPATH}:~/projects/AB3DMOT/Xinshuo_PyToolbox
 
 # Run AB3DMOT on KITTI validation split
 echo "Running AB3DMOT on KITTI validation split..."

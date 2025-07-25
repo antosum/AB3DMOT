@@ -33,8 +33,8 @@ def fix_calib_file(filepath):
 
 def main():
     # Fix training calib files
-    train_calib_dir = "/home/antonin-sumner/projects/AB3DMOT/data/KITTI/tracking/training/calib"
-    test_calib_dir = "/home/antonin-sumner/projects/AB3DMOT/data/KITTI/tracking/testing/calib"
+    train_calib_dir = "~/projects/AB3DMOT/data/KITTI/tracking/training/calib"
+    test_calib_dir = "~/projects/AB3DMOT/data/KITTI/tracking/testing/calib"
     
     for calib_dir in [train_calib_dir, test_calib_dir]:
         if os.path.exists(calib_dir):
